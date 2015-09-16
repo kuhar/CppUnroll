@@ -1,6 +1,9 @@
 #ifndef CPP_UNROLL_H
 #define CPP_UNROLL_H
 
+#include <type_traits>
+#include <utility>
+
 namespace cpp_unroll_helper 
 {
 
