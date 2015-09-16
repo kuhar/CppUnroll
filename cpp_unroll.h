@@ -123,6 +123,14 @@ void unrolled_for(int times, F f)
 	cpp_unroll_helper::unrolled_for_runner<N>::run(f, times);
 }
 
+template<typename N, typename F>
+void unrolled_for(N n, int times, F f)
+{
+	constexpr int Factor = int(n);
+	static_assert(Factor > 0, "");
+	cpp_unroll_helper::unrolled_for_runner<Factor>::run(f, times);
+}
+
 }
 
 #endif // CPP_UNROLL_H
