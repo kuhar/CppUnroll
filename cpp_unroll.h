@@ -3,11 +3,16 @@
 
 #include <type_traits>
 #include <utility>
+#include <cstdint>
+#include <cstddef>
 
 namespace cpp_unroll_helper 
 {
 
-template<int N>
+using IntegerType = std::conditional_t<
+	(sizeof(ptrdiff_t) == sizeof(int64_t)), int64_t, int>;
+
+template<IntegerType N>
 struct unrolled_for_inner
 {
 	template<typename F>
@@ -48,22 +53,22 @@ struct unrolled_for_inner<0>
 		case 8:   FUNCTOR_N(); \
 		CPP_UNROLL_REM_8(FUNCTOR_N)
 
-template<int N, typename = void>
+template<IntegerType N, typename = void>
 struct unrolled_for_remainder
 {
 	template<typename F>
-	static void run(F& f, int times)
+	static void run(F& f, IntegerType times)
 	{
-		for (int i = 0; i < times % N; ++i)
+		for (IntegerType i = 0; i < times % N; ++i)
 			f();
 	}
 };
 
-template<int N>
+template<IntegerType N>
 struct unrolled_for_remainder<N, std::enable_if_t<(N <= 4)>>
 {
 	template<typename F>
-	static void run(F& f, int times)
+	static void run(F& f, IntegerType times)
 	{
 		switch (times % N)
 		{
@@ -72,11 +77,11 @@ struct unrolled_for_remainder<N, std::enable_if_t<(N <= 4)>>
 	}
 };
 
-template<int N>
+template<IntegerType N>
 struct unrolled_for_remainder<N, std::enable_if_t<(N > 4 && N <= 8)>>
 {
 	template<typename F>
-	static void run(F& f, int times)
+	static void run(F& f, IntegerType times)
 	{
 		switch (times % N)
 		{
@@ -85,11 +90,11 @@ struct unrolled_for_remainder<N, std::enable_if_t<(N > 4 && N <= 8)>>
 	}
 };
 
-template<int N>
+template<IntegerType N>
 struct unrolled_for_remainder<N, std::enable_if_t<(N > 8 && N <= 16)>>
 {
 	template<typename F>
-	static void run(F& f, int times)
+	static void run(F& f, IntegerType times)
 	{
 		switch (times % N)
 		{
@@ -98,13 +103,13 @@ struct unrolled_for_remainder<N, std::enable_if_t<(N > 8 && N <= 16)>>
 	}
 };
 
-template<int N>
+template<IntegerType N>
 struct unrolled_for_runner
 {
 	template<typename F>
-	static void run(F& f, int times)
+	static void run(F& f, IntegerType times)
 	{
-		for (int i = 0; i < times / N; ++i)
+		for (IntegerType i = 0; i < times / N; ++i)
 			unrolled_for_inner<N>::run(f);
 		if (times > 0)
 			unrolled_for_remainder<N>::run(f, times);
@@ -116,17 +121,19 @@ struct unrolled_for_runner
 namespace cpp_unroll
 {
 
-template<int N, typename F>
-void unrolled_for(int times, F f)
+using cpp_unroll_helper::IntegerType;
+
+template<IntegerType N, typename F>
+void unrolled_for(IntegerType times, F f)
 {
 	static_assert(N > 0, "");
 	cpp_unroll_helper::unrolled_for_runner<N>::run(f, times);
 }
 
 template<typename N, typename F>
-void unrolled_for(N n, int times, F f)
+void unrolled_for(N n, IntegerType times, F f)
 {
-	constexpr int Factor = int(n);
+	constexpr IntegerType Factor = IntegerType(n);
 	static_assert(Factor > 0, "");
 	cpp_unroll_helper::unrolled_for_runner<Factor>::run(f, times);
 }
