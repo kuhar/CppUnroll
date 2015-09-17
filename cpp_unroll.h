@@ -25,17 +25,6 @@ struct unrolled_for_inner<0>
 	static void run(F&) {}
 };
 
-template<int N, typename = void>
-struct unrolled_for_remainder
-{
-	template<typename F>
-	static void run(F& f, int times)
-	{
-		for (int i = 0; i < times % N; ++i)
-			f();
-	}
-};
-
 #define CPP_UNROLL_REM_4(FUNCTOR_N) \
 		case 3:  FUNCTOR_N(); \
 		case 2:  FUNCTOR_N(); \
@@ -58,6 +47,17 @@ struct unrolled_for_remainder
 		case 9:   FUNCTOR_N(); \
 		case 8:   FUNCTOR_N(); \
 		CPP_UNROLL_REM_8(FUNCTOR_N)
+
+template<int N, typename = void>
+struct unrolled_for_remainder
+{
+	template<typename F>
+	static void run(F& f, int times)
+	{
+		for (int i = 0; i < times % N; ++i)
+			f();
+	}
+};
 
 template<int N>
 struct unrolled_for_remainder<N, std::enable_if_t<(N <= 4)>>
@@ -131,6 +131,6 @@ void unrolled_for(N n, int times, F f)
 	cpp_unroll_helper::unrolled_for_runner<Factor>::run(f, times);
 }
 
-}
+} // namespace cpp_unroll
 
 #endif // CPP_UNROLL_H
