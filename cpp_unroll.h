@@ -134,7 +134,7 @@ void unrolled_for(IntegerType times, F f)
 template<typename N, typename F>
 void unrolled_for(N n, IntegerType times, F f)
 {
-	constexpr IntegerType Factor = IntegerType(n);
+	constexpr IntegerType Factor(n);
 	static_assert(Factor > 0, "");
 	cpp_unroll_helper::unrolled_for_runner<Factor>::run(f, times);
 }
