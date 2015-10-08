@@ -26,5 +26,15 @@ int main() {
 	unrolled_for(16_c, n, [] { // hana's integral constant
 		std::cout << "!\n";
 	});
+	
+	// range for support!
+	std::vector<int> numbers = {1, 2, 3, 4, 5};
+	unrolled_for<4>(numbers, [] (int x) {
+		std::cout << x << ' ';
+	});
+    
+	unrolled_for(2_c, {3.14, -2.0, 12.56}, [] (double x) {
+		std::cout << ' ' << x;
+	});
 }
 ```

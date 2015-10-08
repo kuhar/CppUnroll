@@ -2,9 +2,11 @@
 #define CPP_UNROLL_H
 
 #include <type_traits>
+#include <iterator>
 #include <utility>
 #include <cstdint>
 #include <cstddef>
+#include <initializer_list>
 
 namespace cpp_unroll_helper 
 {
@@ -136,6 +138,58 @@ void unrolled_for(N n, IntegerType times, F f)
 	constexpr IntegerType Factor(n);
 	static_assert(Factor > 0, "");
 	cpp_unroll_helper::unrolled_for_runner<Factor>::run(f, times);
+}
+
+template<IntegerType N, typename R, typename F>
+auto unrolled_for(R&& range, F f) -> decltype(
+        std::begin(std::declval<std::remove_reference_t<R>>()),
+        std::end(std::declval<std::remove_reference_t<R>>()),
+        (void) 0)
+{
+	static_assert(N > 0, "");
+    auto it = std::begin(range);
+    auto e = std::end(range);
+    const auto n = std::distance(it, e);
+
+    auto functor = [&it, &f] {
+            f(*it);
+            ++it;
+    };
+    cpp_unroll_helper::unrolled_for_runner<N>::run(functor, n);  
+}
+
+template<typename  N, typename R, typename F>
+auto unrolled_for(N n, R&& range, F f) -> decltype(
+        std::begin(std::declval<std::remove_reference_t<R>>()),
+        std::end(std::declval<std::remove_reference_t<R>>()),
+        (void) 0)
+{
+    constexpr IntegerType Factor = IntegerType(n);
+	static_assert(Factor > 0, "");
+    unrolled_for<Factor>(std::forward<R>(range), f);  
+}
+
+template<IntegerType N, typename T, typename F>
+void unrolled_for(std::initializer_list<T> list, F f)
+{
+	static_assert(N > 0, "");
+    auto it = list.begin();
+    auto e = list.end();
+    const auto n = std::distance(it, e);
+
+    auto functor = [&it, &f] {
+            f(*it);
+            ++it;
+    };
+    cpp_unroll_helper::unrolled_for_runner<N>::run(functor, n);  
+}
+
+template<typename  N, typename T, typename F>
+void unrolled_for(N n, std::initializer_list<T> list, F f)
+{
+    constexpr IntegerType Factor = IntegerType(n);
+	static_assert(Factor > 0, "");
+    unrolled_for<Factor>(std::move(list), f);  
 }
 
 } // namespace cpp_unroll
