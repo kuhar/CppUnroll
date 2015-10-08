@@ -164,7 +164,7 @@ auto unrolled_for(N n, R&& range, F f) -> decltype(
         std::end(std::declval<std::remove_reference_t<R>>()),
         (void) 0)
 {
-    constexpr IntegerType Factor = IntegerType(n);
+    constexpr IntegerType Factor(n);
 	static_assert(Factor > 0, "");
     unrolled_for<Factor>(std::forward<R>(range), f);  
 }
@@ -187,7 +187,7 @@ void unrolled_for(std::initializer_list<T> list, F f)
 template<typename  N, typename T, typename F>
 void unrolled_for(N n, std::initializer_list<T> list, F f)
 {
-    constexpr IntegerType Factor = IntegerType(n);
+    constexpr IntegerType Factor(n);
 	static_assert(Factor > 0, "");
     unrolled_for<Factor>(std::move(list), f);  
 }
