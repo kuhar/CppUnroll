@@ -33,7 +33,7 @@ int main() {
 		std::cout << x << ' ';
 	});
     
-	unrolled_for(2_c, numbers, [] (int x) {
+	unrolled_for(2_c, {3.14, -2.0, 12.56}, [] (double x) {
 		std::cout << ' ' << x;
 	});
 }
