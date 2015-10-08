@@ -142,9 +142,7 @@ void unrolled_for(N n, IntegerType times, F f)
 
 template<IntegerType N, typename R, typename F>
 auto unrolled_for(R&& range, F f) -> decltype(
-        std::begin(std::declval<std::remove_reference_t<R>>()),
-        std::end(std::declval<std::remove_reference_t<R>>()),
-        (void) 0)
+        std::begin(range), std::end(range), (void) 0)
 {
 	static_assert(N > 0, "");
     auto it = std::begin(range);
@@ -160,9 +158,7 @@ auto unrolled_for(R&& range, F f) -> decltype(
 
 template<typename  N, typename R, typename F>
 auto unrolled_for(N n, R&& range, F f) -> decltype(
-        std::begin(std::declval<std::remove_reference_t<R>>()),
-        std::end(std::declval<std::remove_reference_t<R>>()),
-        (void) 0)
+        std::begin(range), std::end(range), (void) 0)
 {
     constexpr IntegerType Factor(n);
 	static_assert(Factor > 0, "");
