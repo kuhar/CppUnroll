@@ -28,7 +28,7 @@ int main() {
 	});
 	
 	// range for support!
-	std::vector<int> numbers = { 1, 2, 3, 4, 5 };
+	std::vector<int> numbers = {1, 2, 3, 4, 5};
 	unrolled_for<4>(numbers, [] (int x) {
 		std::cout << x << ' ';
 	});
