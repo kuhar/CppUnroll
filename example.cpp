@@ -21,7 +21,7 @@ int main()
         std::cout << x << ' ';
     });
     
-    unrolled_for(std::integral_constant<int, 2>{}, numbers, [] (int x) {
+    unrolled_for(std::integral_constant<int, 2>{}, {3.4, 54.3, -1.3}, [] (float x) {
         std::cout << ' ' << x;
     });
 }

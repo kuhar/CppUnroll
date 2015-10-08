@@ -6,6 +6,7 @@
 #include <utility>
 #include <cstdint>
 #include <cstddef>
+#include <initializer_list>
 
 namespace cpp_unroll_helper 
 {
@@ -140,12 +141,10 @@ void unrolled_for(N n, IntegerType times, F f)
 }
 
 template<IntegerType N, typename R, typename F>
-std::enable_if_t<std::is_same<
-                    decltype(std::begin(std::declval<std::remove_reference_t<R>>()),
-                             std::end(std::declval<std::remove_reference_t<R>>()),
-                             true),
-                    bool>::value,
-                void> unrolled_for(R&& range, F f)
+auto unrolled_for(R&& range, F f) -> decltype(
+        std::begin(std::declval<std::remove_reference_t<R>>()),
+        std::end(std::declval<std::remove_reference_t<R>>()),
+        (void) 0)
 {
 	static_assert(N > 0, "");
     auto it = std::begin(range);
@@ -160,18 +159,38 @@ std::enable_if_t<std::is_same<
 }
 
 template<typename  N, typename R, typename F>
-std::enable_if_t<std::is_same<
-                    decltype(std::begin(std::declval<std::remove_reference_t<R>>()),
-                             std::end(std::declval<std::remove_reference_t<R>>()),
-                             true),
-                    bool>::value,
-                void> unrolled_for(N n, R&& range, F f)
+auto unrolled_for(N n, R&& range, F f) -> decltype(
+        std::begin(std::declval<std::remove_reference_t<R>>()),
+        std::end(std::declval<std::remove_reference_t<R>>()),
+        (void) 0)
 {
     constexpr IntegerType Factor = IntegerType(n);
 	static_assert(Factor > 0, "");
     unrolled_for<Factor>(std::forward<R>(range), f);  
 }
 
+template<IntegerType N, typename T, typename F>
+void unrolled_for(std::initializer_list<T> list, F f)
+{
+	static_assert(N > 0, "");
+    auto it = list.begin();
+    auto e = list.end();
+    const auto n = std::distance(it, e);
+
+    auto functor = [&it, &f] {
+            f(*it);
+            ++it;
+    };
+    cpp_unroll_helper::unrolled_for_runner<N>::run(functor, n);  
+}
+
+template<typename  N, typename T, typename F>
+void unrolled_for(N n, std::initializer_list<T> list, F f)
+{
+    constexpr IntegerType Factor = IntegerType(n);
+	static_assert(Factor > 0, "");
+    unrolled_for<Factor>(std::move(list), f);  
+}
 
 } // namespace cpp_unroll
 
