@@ -118,6 +118,35 @@ struct unrolled_for_runner
 	}
 };
 
+template<typename C>
+auto has_size_helper(const C& c) -> decltype(c.size(), true)
+{
+	return true;
+}
+
+float has_size_helper(...)
+{
+	return 0.0f;
+}
+
+template<typename C>
+auto get_size_helper(const C& c, bool)
+{
+	return c.size();
+}
+
+template<typename C>
+auto get_size_helper(const C& c, float)
+{
+	return std::distance(std::begin(c), std::end(c));
+}
+
+template<typename C>
+auto get_size(const C& c)
+{
+	return get_size_helper(c, has_size_helper(c));
+}
+
 } // cpp_unroll_helper
 
 namespace cpp_unroll
@@ -146,8 +175,7 @@ auto unrolled_for(R&& range, F f) -> decltype(
 {
 	static_assert(N > 0, "");
     auto it = std::begin(range);
-    auto e = std::end(range);
-    const auto n = std::distance(it, e);
+    const auto n = cpp_unroll_helper::get_size(range);
 
     auto functor = [&it, &f] {
             f(*it);
@@ -170,8 +198,7 @@ void unrolled_for(std::initializer_list<T> list, F f)
 {
 	static_assert(N > 0, "");
     auto it = list.begin();
-    auto e = list.end();
-    const auto n = std::distance(it, e);
+    const auto n = cpp_unroll_helper::get_size(list);
 
     auto functor = [&it, &f] {
             f(*it);
